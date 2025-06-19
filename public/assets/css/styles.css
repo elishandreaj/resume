@@ -1,0 +1,517 @@
+html {
+    background: #f4f6f8;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.columns {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    gap: 20px;
+}
+
+.column > .card {
+    height: 100%;
+}
+
+/* Profile */
+.section {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    transform: translateX(5%);
+    width: 92%;
+}
+
+.profile-banner {
+    width: 101.75%;
+    height: 200px;
+    background: linear-gradient(120deg, #0073b1 0%, #6dd5ed 100%);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0;
+    min-height: 180px;
+    position: relative; 
+    margin-top: -10px;
+}
+
+.profile-banner .button {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.13); 
+    position: absolute; 
+    top: 150px; 
+    right: 20px;
+}
+
+.profile-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -90px;
+    z-index: 2;
+}
+
+.profile-pic {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 0 0 6px #0073b1, 0 8px 32px rgba(0,0,0,0.18);
+    background: #fff;
+    display: block;
+    position: relative;
+    z-index: 2;
+    transition: box-shadow 0.3s;
+}
+
+.add-icon {
+    position: absolute;
+    bottom: 5px;
+    right: -5px;
+    background: #fff;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    border: 2px solid #000;
+    z-index: 2;
+}
+.add-icon img {
+    width: 28px;
+    height: 28px;
+}
+
+.file-input {
+    display: none;
+}
+
+.fab-edit-btn {
+    top: 24px;
+    right: 32px;
+    z-index: 3;
+    background: #fff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+    height: 44px;
+    width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: box-shadow 0.2s, background 0.2s;
+}
+.fab-edit-btn:hover {
+    background: #e3f2fd;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+}
+
+.edit-icon-img {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+
+/* Education Section */
+.school-logo-badge {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #f4f6f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin-right: 18px;
+    margin-top: 4px;
+    flex-shrink: 0;
+    border: 2px solid #e3f2fd;
+}
+
+.education-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2px;
+}
+
+.education-details {
+    flex: 1;
+}
+
+.school-name {
+    font-weight: bold;
+    font-size: 1.08em;
+    color: #222;
+}
+
+.education-dates {
+    font-size: 1em;
+    color: #7a7a7a;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.degree-program {
+    color: #444;
+    font-size: 1em;
+    margin-bottom: 2px;
+}
+
+.scroll-indicator-item {
+    background: #f8fafc;
+    border: 2px dashed #b3d8f6;
+}
+
+.timeline .education-details-content {
+    display: block;
+    transition: max-height 0.3s ease;
+}
+
+.timeline .item.collapsed .education-details-content {
+    display: none;
+}
+
+.item.collapsed .expand-btn {
+    transform: rotate(-90deg);
+    transition: transform 0.2s;
+}
+.school-logo-upload {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.educ-add-icon {
+  position: absolute;
+  bottom: 0;
+  right: calc(50% - 45px); 
+  transform: translateX(50%);
+  background: #fff;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  border: 2px solid #000;
+  z-index: 2;
+}
+
+.educ-add-icon img {
+  width: 30px;
+  height: 30px;
+}
+
+
+/* Skills Section */
+ul#technical-skills-list li,
+ul#programming-skills-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 1em;
+}
+
+.delete-skill-btn {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    height: 26px;
+    font-size: 1.1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.delete-skill-btn:hover {
+    background: #c0392b;
+}
+
+.show-more-btn {
+    background: #eee;
+    color: #0073b1;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 0.98em;
+    cursor: pointer;
+    margin-top: 2px;
+    margin-left: 0;
+    transition: background 0.2s;
+}
+
+.show-more-btn:hover {
+    background: #dbefff;
+    color: #005983;
+}
+
+/* Education and Employment: Timeline Dots (Dynamic Colors) */
+.timeline .item:nth-child(1) .timeline-dot { border-color: #0073b1; background: #e3f2fd; }
+.timeline .item:nth-child(2) .timeline-dot { border-color: #e67e22; background: #fff3e0; }
+.timeline .item:nth-child(3) .timeline-dot { border-color: #27ae60; background: #eafaf1; }
+.timeline .item:nth-child(4) .timeline-dot { border-color: #9b59b6; background: #f3eafc; }
+.timeline .item:nth-child(5) .timeline-dot { border-color: #e74c3c; background: #fdeaea; }
+
+.timeline-dot.color-1 { border-color: #0073b1; background: #e3f2fd; }
+.timeline-dot.color-2 { border-color: #e67e22; background: #fff3e0; }
+.timeline-dot.color-3 { border-color: #27ae60; background: #eafaf1; }
+.timeline-dot.color-4 { border-color: #9b59b6; background: #f3eafc; }
+.timeline-dot.color-5 { border-color: #e74c3c; background: #fdeaea; }
+
+.timeline-dot {
+    position: absolute;
+    left: -23px;               
+    top: 25px;
+    transform: translateY(-50%, 50%);
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border: 3px solid #3b4a5a;
+    border-radius: 50%;
+    z-index: 2;
+    box-sizing: border-box;
+}
+
+/* Employment + Other Section */
+#employment-card, #projects-card, #extra-card {
+    margin-left: 50px;
+    margin-bottom: 10px;
+} 
+
+.employment-details, .extra-details {
+    margin-left: 0;
+    flex: 1;
+}
+
+.employment-row, .extra-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2px;
+}
+
+.employment-company, .extra-title {
+    font-weight: bold;
+    font-size: 1.08em;
+    color: #222;
+}
+
+.employment-dates, .extra-dates {
+    font-size: 1em;
+    color: #7a7a7a;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.employment-title, .extra-role {
+    font-size: 1em;
+    color: #444;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.employment-desc, .extra-desc {
+    margin: 0 0 0 0;
+    padding-left: 18px;
+    font-size: 0.98em;
+    color: #444;
+}
+
+.employment-desc li, .extra-desc li {
+    margin-bottom: 4px;
+    line-height: 1.5;
+}
+
+/* Projects Section */
+.project-item {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 1rem;
+    margin: 0.5rem;
+    transition: box-shadow 0.2s;
+    cursor: pointer;
+    flex: 0 0 auto;
+    width: 260px;
+    scroll-snap-align: start;
+}
+
+.project-item:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.project-dates {
+    font-size: 1em;
+    color: #7a7a7a;
+    font-weight: 500;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.project-role {
+    font-size: 1em;
+    color: #444;
+    margin-bottom: 6px;
+    font-style: italic;
+}
+
+.project-desc {
+    text-align: justify;
+    margin-top: 0.5rem;
+    padding: 0 0.5rem;
+}
+
+.project-list-horizontal {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding: 1rem 0;
+    text-align: center;
+    scroll-snap-type: x mandatory;
+    flex-wrap: nowrap;
+    scroll-behavior: smooth;
+}
+
+.project-list-horizontal::-webkit-scrollbar {
+  display: none; 
+}
+
+.project-img {
+    width: 250px; 
+    height: 150px; 
+    object-fit: cover; 
+    border-radius: 12px; 
+    border-color: lightblue; 
+    border-width: 3px; 
+    border-style: solid;
+}
+
+/* All except profile section */
+.card {
+    border-radius: 14px; 
+    max-width: 1175px; 
+    margin-top: 20px;
+}
+
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.3);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 8% auto;
+    padding: 24px 28px;
+    border: 1px solid #888;
+    width: 320px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.close {
+    color: #aaa;
+    position: absolute;
+    right: 18px;
+    top: 12px;
+    font-size: 48px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+    outline: none;
+    padding: 0;
+    line-height: 1;
+    z-index: 10;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+#educationForm button[type="submit"]:hover, #employmentForm button[type="submit"]:hover, #projectForm button[type="submit"]:hover, #extraForm button[type="submit"]:hover, #editForm button[type="submit"]:hover {
+    background: #005983;
+}
+
+/* Education and Employment */
+.timeline {
+    position: relative;
+    margin-left: 0;           
+    padding-bottom: 8px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 5px;               
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e3f2fd;
+    z-index: 0;
+}
+
+/* Items */
+.item {
+    position: relative;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;         
+    min-height: 54px;
+    background: none;
+    border-radius: 8px;
+    padding: 0;
+    left: 20px;
+    cursor: pointer;
+}
+
+.item:hover, .extra-item:hover {
+    background: #f4f6f8;
+}
+
+.extra-item {
+    position: relative;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;         
+    min-height: 54px;
+    background: none;
+    border-radius: 8px;
+    padding: 0;
+    left: 20px;
+    cursor: pointer;
+}
