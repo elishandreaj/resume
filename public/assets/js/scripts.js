@@ -9,7 +9,7 @@ function toggleModal(modalId, show = true) {
     document.getElementById(modalId).style.display = show ? 'flex' : 'none';
 }
 
-function resetForm(formId, imagePreviewId, defaultImage = '/assets/img/profile.png') {
+function resetForm(formId, imagePreviewId, defaultImage = BASE_URL + 'assets/img/profile.png') {
     document.getElementById(formId).reset();
     if (imagePreviewId) {
         document.getElementById(imagePreviewId).src = defaultImage;
@@ -27,6 +27,12 @@ window.onclick = function(event) {
     }
 }
 
+window.addEventListener('DOMContentLoaded', function() {
+    renderSkills();
+    matchSkillsCardHeight();
+});
+window.addEventListener('resize', matchSkillsCardHeight);
+
 function toggleEducationDetails(event, el) {
     event.stopPropagation();
     el.closest('.item')?.classList.toggle('collapsed');
@@ -35,19 +41,16 @@ function toggleEducationDetails(event, el) {
 window.addEventListener('DOMContentLoaded', () => {
     const logoInput = document.getElementById('schoolLogoInput');
     logoInput?.addEventListener('change', event => previewImage(event, 'schoolLogoPreview'));
-    
+
+    document.getElementById('fileInput').addEventListener('change', event => {
+    previewImage(event, 'profilePic');
+    });
+
     renderSkills();
     matchSkillsCardHeight();
 });
 
 window.addEventListener('resize', matchSkillsCardHeight);
-
-window.onclick = function(event) {
-    ['editModal', 'educationModal'].forEach(modalId => {
-        const modal = document.getElementById(modalId);
-        if (modal && event.target === modal) toggleModal(modalId, false);
-    });
-};
 
 // PROFILE 
 function openModal() {
@@ -63,10 +66,40 @@ function closeModal() {
 
 function saveProfile(event) {
     event.preventDefault();
-    ['Name', 'Desc', 'Email', 'Phone'].forEach(field => {
-        document.getElementById(`profile${field}`).textContent = document.getElementById(`edit${field}`).value;
+    const fd = new FormData();
+    fd.append('id', document.getElementById('userId').value);
+    fd.append('name', document.getElementById('editName').value);
+    fd.append('description', document.getElementById('editDesc').value);
+    fd.append('email', document.getElementById('editEmail').value);
+    fd.append('phone', document.getElementById('editPhone').value);
+
+    const file = document.getElementById('fileInput').files[0];
+    if (file) fd.append('profile_pic', file);
+
+    fetch(BASE_URL + '/profile/update', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.status === 'success') {
+            document.getElementById('profileName').textContent = fd.get('name');
+            document.getElementById('profileDesc').textContent = fd.get('description');
+            document.getElementById('profileEmail').textContent = fd.get('email');
+            document.getElementById('profilePhone').textContent = fd.get('phone');
+        if (result.profile_pic) {
+            document.getElementById('profilePic').src = result.profile_pic;
+        }
+        closeModal();
+        } else {
+        alert('Failed to update profile');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('An error occurred while updating profile');
     });
-    closeModal();
 }
 
 // EDUCATION 
@@ -80,20 +113,20 @@ function openAddEducationModal() {
 }
 
 function openEditEducationModal(index) {
-    editingEducationIndex = index;
-    const item = document.querySelectorAll('.item')[index];
-    if (!item) return;
+  editingEducationIndex = index;
+  const item = document.querySelectorAll('.item')[index];
+  editingSchoolId = item.dataset.eduid; 
 
-    document.getElementById('educationModalTitle').textContent = 'Edit Education';
-    document.getElementById('schoolName').value = item.querySelector('.school-name')?.textContent || '';
-    document.getElementById('degreeProgram').value = item.querySelector('.degree-program')?.textContent || '';
+  document.getElementById('eduId').value = editingSchoolId;
+  document.getElementById('schoolName').value = item.querySelector('.school-name').textContent;
+  document.getElementById('degreeProgram').value = item.querySelector('.degree-program').textContent;
 
-    const [start, end] = item.querySelector('.education-dates')?.textContent.split('-') || [];
-    document.getElementById('startDate').value = start?.trim() || '';
-    document.getElementById('endDate').value = end?.trim() || '';
+  const datesEl = item.querySelector('.education-dates');
+  document.getElementById('startDate').value = item.querySelector('.education-dates').dataset.start;
+  document.getElementById('endDate').value = item.querySelector('.education-dates').dataset.end;
 
-    document.getElementById('schoolLogoPreview').src = item.querySelector('.school-logo')?.src || '/assets/img/profile.png';
-    toggleModal('educationModal', true);
+  document.getElementById('schoolLogoPreview').src = item.querySelector('.school-logo').src || BASE_URL + 'assets/img/profile.png';
+  toggleModal('educationModal', true);
 }
 
 function closeEducationModal() {
@@ -102,43 +135,63 @@ function closeEducationModal() {
 
 function saveEducation(event) {
     event.preventDefault();
-    const school = document.getElementById('schoolName').value;
-    const degree = document.getElementById('degreeProgram').value;
-    const start = document.getElementById('startDate').value;
-    const end = document.getElementById('endDate').value;
-    const logoSrc = document.getElementById('schoolLogoPreview').src;
-
-    const list = document.querySelector('.education-list');
+    const fd = new FormData();
+    
+    fd.append('user_id', document.getElementById('userId').value);
 
     if (editingEducationIndex !== null) {
-        const item = document.querySelectorAll('.education-item')[editingEducationIndex];
-        item.querySelector('.school-name').textContent = school;
-        item.querySelector('.degree-program').textContent = degree;
-        item.querySelector('.education-dates').textContent = `${start} - ${end}`;
-        item.querySelector('.school-logo').src = logoSrc;
-    } else {
-        const newItem = document.createElement('div');
-        newItem.className = 'education-item';
-        newItem.onclick = () => openEditEducationModal(list.querySelectorAll('.education-item').length);
-        newItem.innerHTML = `
-            <img src="${logoSrc}" class="school-logo">
-            <div class="education-details">
-                <div class="school-name">${school}</div>
-                <div class="degree-program">${degree}</div>
-                <div class="education-dates">${start} - ${end}</div>
-            </div>
-        `;
-        list.appendChild(newItem);
+        fd.append('id', editingSchoolId);
     }
 
-    closeEducationModal();
+    fd.append('school_name', document.getElementById('schoolName').value);
+    fd.append('degree_program', document.getElementById('degreeProgram').value);
+    fd.append('start_date', document.getElementById('startDate').value);
+    fd.append('end_date', document.getElementById('endDate').value);
+
+    const file = document.getElementById('schoolLogoInput').files[0];
+    if (file) fd.append('school_logo', file);
+
+    fetch(BASE_URL + '/education/save', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd
+    })
+    .then(res => res.json())
+    .then(res => {
+    if (res.status === 'success') {
+        const edu = res.education;
+        if (res.action === 'updated') {
+            const item = document.querySelectorAll('.item')[editingEducationIndex];
+            item.querySelector('.school-logo').src = edu.school_logo;
+            item.querySelector('.school-name').textContent = edu.school_name;
+            item.querySelector('.degree-program').textContent = edu.degree_program;
+            item.querySelector('.education-dates').textContent = `${edu.start_date} - ${edu.end_date}`;
+        } else {
+            const list = document.querySelector('.education-list');
+            const newItem = document.createElement('div');
+            newItem.className = 'item';
+            newItem.onclick = () => openEditEducationModal(list.children.length);
+            newItem.innerHTML = `
+                <img src="${edu.school_logo}" class="school-logo">
+                <div class="education-details">
+                <div class="school-name">${edu.school_name}</div>
+                <div class="degree-program">${edu.degree_program}</div>
+                <div class="education-dates">${edu.start_date} - ${edu.end_date}</div>
+                </div>
+            `;
+            list.appendChild(newItem);
+        }
+
+        closeEducationModal();
+
+        } else {
+        alert('Failed to save education');
+        }
+    }).catch(console.error);
 }
 
 // --- Skills Section Dynamic List ---
-let technicalSkills = ["Web Development", "Database Management", "UI/UX Design", "Version Control (Git)"];
-let programmingSkills = ["Python", "JavaScript", "PHP", "Java"];
-
-let editMode = null; // 'technical', 'programming', or null
+let editMode = null;
 let showAllTechnical = false;
 let showAllProgramming = false;
 
@@ -205,7 +258,7 @@ function renderSkills() {
         progList.appendChild(li);
     }
 
-    matchSkillsCardHeight(); // Sync heights after rendering
+    matchSkillsCardHeight(); 
 }
 
 function toggleAddSkillInput(type) {
@@ -245,22 +298,45 @@ function toggleAddSkillInput(type) {
 }
 
 function addSkill(type) {
-    if(type === 'technical') {
-        const val = document.getElementById('newTechnicalSkill').value.trim();
-        if(val) {
-            technicalSkills.push(val);
-            document.getElementById('newTechnicalSkill').value = '';
-            renderSkills();
-        }
+    const inputId = type === 'technical' ? 'newTechnicalSkill' : 'newProgrammingSkill';
+    const val = document.getElementById(inputId).value.trim();
+    if (!val) return;
+
+    if (type === 'technical') {
+        technicalSkills.push(val);
+        document.getElementById(inputId).value = '';
     } else {
-        const val = document.getElementById('newProgrammingSkill').value.trim();
-        if(val) {
-            programmingSkills.push(val);
-            document.getElementById('newProgrammingSkill').value = '';
-            renderSkills();
-        }
+        programmingSkills.push(val);
+        document.getElementById(inputId).value = '';
     }
+    renderSkills();
+
+    saveSkill();
 }
+
+function saveSkill() {
+    const payload = {
+        technical: technicalSkills,
+        programming: programmingSkills
+    };
+
+    fetch(`${BASE_URL}/skills/save`, {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.status !== 'success') {
+        alert('Failed to save skills.');
+        }
+    })
+    .catch(console.error);
+}
+
 
 function deleteSkill(type, idx) {
     if(type === 'technical') {
@@ -271,7 +347,7 @@ function deleteSkill(type, idx) {
     renderSkills();
 }
 
-// --- Dynamic height sync ---
+// Dynamic height sync
 function matchSkillsCardHeight() {
     const edu = document.getElementById('education-card');
     const skills = document.getElementById('skills-card');
@@ -283,13 +359,6 @@ function matchSkillsCardHeight() {
         skills.style.height = maxHeight + 'px';
     }
 }
-
-// Run on load and resize
-window.addEventListener('DOMContentLoaded', function() {
-    renderSkills();
-    matchSkillsCardHeight();
-});
-window.addEventListener('resize', matchSkillsCardHeight);
 
 // EMPLOYMENT
 let editingEmploymentIndex = null;
@@ -344,7 +413,7 @@ function openEditProjectModal(index) {
     document.getElementById('projectDesc').value = Array.from(item.querySelectorAll('.project-desc li')).map(li => li.textContent).join('\n');
 
     const img = item.querySelector('.project-img');
-    document.getElementById('projectImgPreview').src = img?.src || '/assets/img/profile.png';
+    document.getElementById('projectImgPreview').src = img?.src || BASE_URL + 'assets/img/profile.png';
     toggleModal('projectsModal', true);
 }
 
