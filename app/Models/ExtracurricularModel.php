@@ -9,7 +9,6 @@ class ExtracurricularModel extends Model
     protected $table = 'extracurriculars';
     protected $primaryKey = 'id';
     protected $allowedFields = [
-        'user_id',
         'title',
         'role',
         'dates',

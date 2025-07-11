@@ -2,53 +2,66 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
-use CodeIgniter\Controller;
 use App\Models\SkillModel;
 
 class Skills extends BaseController
 {
-    public function education()
-    {
-        $userModel      = new UserModel();
-        $skillModel     = new SkillModel();
+    protected $skillModel;
 
-        $user      = $userModel->find(session()->get('user_id'));
-        $skills    = $skillModel
-                        ->where('user_id', $user['id'])
-                        ->findAll();
+    public function __construct() {
+        $this->skillModel = new SkillModel();
+    }
+
+    public function index()
+    {
+        $userId = session()->get('user_id');
+
+        $user   = (new UserModel())->find($userId);
+        $skills = $this->skillModel->where('user_id', $userId)->findAll();
 
         return view('skill', [
-            'user'      => $user,
-            'skill'     => $skills
+            'user'   => $user,
+            'skills' => $skills,
         ]);
     }
 
-    public function save()
+    public function add()
     {
-        if (!$this->request->isAJAX()) return;
+        if (!$this->request->isAJAX()) return redirect()->back();
 
-        $model = new SkillModel();
-        $userId = session()->get('user_id');
-        $skill_type = $this->request->getPost('skill_type');
-        $skill_name = $this->request->getPost('skill_name');
+        try {
+            $data = [
+                'user_id'    => 1,
+                'skill_type' => $this->request->getPost('skill_type'),
+                'skill_name' => $this->request->getPost('skill_name'),
+            ];
 
-        if (empty($skill_type) || !in_array($skill_type, ['technical','programming'])) {
-            return $this->response->setJSON(['status' => 'error']);
+            $id = $this->skillModel->insert($data);
+
+            return $this->response->setJSON([
+                'status' => $id ? 'success' : 'error',
+                'id'     => $id,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
         }
+    }
 
-        $model->where('user_id', $userId)
-              ->where('skill_type', $type)
-              ->delete();
+    public function delete()
+    {
+        if (!$this->request->isAJAX()) return redirect()->back();
 
-        foreach ($skill_name as $name) {
-            if (trim($name)){
-                $model->insert([
-                    'user_id'    => $userId,
-                    'skill_type' => $skill_type,
-                    'skill_name' => trim($skill_name),
-                ]);
-            }
-        }
-        return $this->response->setJSON(['status' => 'success']);
+        $id = $this->request->getPost('id');
+        $ok = $this->skillModel->delete($id);
+        return $this->response
+            ->setJSON(['status' => $ok ? 'success' : 'error']);
+    }
+
+    public function list()
+    {
+        if (!$this->request->isAJAX()) return redirect()->back();
+
+        $skills = $this->skillModel->findAll();
+        return $this->response->setJSON($skills);
     }
 }

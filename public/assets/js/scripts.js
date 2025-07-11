@@ -1,3 +1,11 @@
+const technicalSkills = (skillsData || [])
+  .filter(s => s.skill_type === 'technical')
+  .map(s => s.skill_name);
+
+const programmingSkills = (skillsData || [])
+  .filter(s => s.skill_type === 'programming')
+  .map(s => s.skill_name);
+
 // GENERAL
 function previewImage(event, previewId) {
     const reader = new FileReader();
@@ -13,6 +21,18 @@ function resetForm(formId, imagePreviewId, defaultImage = BASE_URL + 'assets/img
     document.getElementById(formId).reset();
     if (imagePreviewId) {
         document.getElementById(imagePreviewId).src = defaultImage;
+    }
+}
+
+function matchSkillsCardHeight() {
+    const edu = document.getElementById('education-card');
+    const skills = document.getElementById('skills-card');
+    if (edu && skills) {
+        skills.style.height = 'auto';
+        edu.style.height = 'auto';
+        const maxHeight = Math.max(edu.offsetHeight, skills.offsetHeight);
+        edu.style.height = maxHeight + 'px';
+        skills.style.height = maxHeight + 'px';
     }
 }
 
@@ -190,230 +210,310 @@ function saveEducation(event) {
     }).catch(console.error);
 }
 
-// --- Skills Section Dynamic List ---
 let editMode = null;
-let showAllTechnical = false;
-let showAllProgramming = false;
-
-function renderSkills() {
-    // Technical
-    const techList = document.getElementById('technical-skills-list');
-    techList.innerHTML = '';
-    const techLimit = 3;
-    const techSkillsToShow = showAllTechnical ? technicalSkills.length : techLimit;
-    technicalSkills.slice(0, techSkillsToShow).forEach((skill, idx) => {
-        const li = document.createElement('li');
-        li.innerHTML = `<span>${skill}</span>`;
-        if (editMode === 'technical') {
-            const delBtn = document.createElement('button');
-            delBtn.textContent = '✕';
-            delBtn.className = 'delete-skill-btn';
-            delBtn.onclick = () => { deleteSkill('technical', idx); };
-            li.appendChild(delBtn);
-        }
-        techList.appendChild(li);
-    });
-    if (technicalSkills.length > techLimit) {
-        const showBtn = document.createElement('button');
-        showBtn.textContent = showAllTechnical ? 'Show less' : 'Show more';
-        showBtn.className = 'show-more-btn';
-        showBtn.onclick = () => {
-            showAllTechnical = !showAllTechnical;
-            renderSkills();
-        };
-        const li = document.createElement('li');
-        li.style.listStyle = 'none';
-        li.appendChild(showBtn);
-        techList.appendChild(li);
-    }
-
-    // Programming
-    const progList = document.getElementById('programming-skills-list');
-    progList.innerHTML = '';
-    const progLimit = 3;
-    const progSkillsToShow = showAllProgramming ? programmingSkills.length : progLimit;
-    programmingSkills.slice(0, progSkillsToShow).forEach((skill, idx) => {
-        const li = document.createElement('li');
-        li.innerHTML = `<span>${skill}</span>`;
-        if (editMode === 'programming') {
-            const delBtn = document.createElement('button');
-            delBtn.textContent = '✕';
-            delBtn.className = 'delete-skill-btn';
-            delBtn.onclick = () => { deleteSkill('programming', idx); };
-            li.appendChild(delBtn);
-        }
-        progList.appendChild(li);
-    });
-    if (programmingSkills.length > progLimit) {
-        const showBtn = document.createElement('button');
-        showBtn.textContent = showAllProgramming ? 'Show less' : 'Show more';
-        showBtn.className = 'show-more-btn';
-        showBtn.onclick = () => {
-            showAllProgramming = !showAllProgramming;
-            renderSkills();
-        };
-        const li = document.createElement('li');
-        li.style.listStyle = 'none';
-        li.appendChild(showBtn);
-        progList.appendChild(li);
-    }
-
-    matchSkillsCardHeight(); 
-}
 
 function toggleAddSkillInput(type) {
-    const techInput = document.getElementById('add-technical-skill');
-    const progInput = document.getElementById('add-programming-skill');
-    const techIcon = document.getElementById('icon-technical');
-    const progIcon = document.getElementById('icon-programming');
+  const techInput = document.getElementById('add-technical-skill');
+  const progInput = document.getElementById('add-programming-skill');
+  const plus = '+', cross = '✕';
 
-    if(type === 'technical') {
-        if (editMode === 'technical') {
-            techInput.style.display = 'none';
-            techIcon.textContent = '+';
-            editMode = null;
-        } else {
-            techInput.style.display = 'flex'; 
-            progInput.style.display = 'none';
-            techIcon.textContent = '✕';
-            progIcon.textContent = '+';
-            editMode = 'technical';
-            document.getElementById('newTechnicalSkill').focus();
-        }
-    } else {
-        if (editMode === 'programming') {
-            progInput.style.display = 'none';
-            progIcon.textContent = '+';
-            editMode = null;
-        } else {
-            progInput.style.display = 'flex'; 
-            techInput.style.display = 'none';
-            progIcon.textContent = '✕';
-            techIcon.textContent = '+';
-            editMode = 'programming';
-            document.getElementById('newProgrammingSkill').focus();
-        }
-    }
-    renderSkills();
+  if (type === 'technical') {
+    const show = techInput.style.display === 'none';
+    techInput.style.display = show ? 'flex' : 'none';
+    document.getElementById('toggle-technical-btn').querySelector('span').textContent = show ? cross : plus;
+    progInput.style.display = 'none';
+    document.getElementById('toggle-programming-btn').querySelector('span').textContent = plus;
+    editMode = show ? 'technical' : null;
+  } else {
+    const show = progInput.style.display === 'none';
+    progInput.style.display = show ? 'flex' : 'none';
+    document.getElementById('toggle-programming-btn').querySelector('span').textContent = show ? cross : plus;
+    techInput.style.display = 'none';
+    document.getElementById('toggle-technical-btn').querySelector('span').textContent = plus;
+    editMode = show ? 'programming' : null;
+  }
+
+  renderSkills(); // will show delete buttons when in edit mode
 }
 
-function addSkill(type) {
-    const inputId = type === 'technical' ? 'newTechnicalSkill' : 'newProgrammingSkill';
-    const val = document.getElementById(inputId).value.trim();
-    if (!val) return;
+function renderSkills() {
+  fetch(`${BASE_URL}/skills/list`, {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+  })
+    .then(response => response.json())
+    .then(skills => {
+      const techList = document.getElementById('technical-skills-list');
+      const progList = document.getElementById('programming-skills-list');
+      techList.innerHTML = '';
+      progList.innerHTML = '';
 
-    if (type === 'technical') {
-        technicalSkills.push(val);
-        document.getElementById(inputId).value = '';
-    } else {
-        programmingSkills.push(val);
-        document.getElementById(inputId).value = '';
-    }
-    renderSkills();
+      skills.forEach(skill => {
+        const li = document.createElement('li');
+        li.textContent = skill.skill_name;
 
-    saveSkill();
-}
-
-function saveSkill() {
-    const payload = {
-        technical: technicalSkills,
-        programming: programmingSkills
-    };
-
-    fetch(`${BASE_URL}/skills/save`, {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(res => {
-        if (res.status !== 'success') {
-        alert('Failed to save skills.');
+        if (editMode === skill.skill_type) {
+          const delBtn = document.createElement('button');
+          delBtn.textContent = '✕';
+          delBtn.className = 'delete-skill-btn';
+          delBtn.onclick = () => deleteSkill(skill.id);
+          li.appendChild(delBtn);
         }
+
+        if (skill.skill_type === 'technical') techList.appendChild(li);
+        else if (skill.skill_type === 'programming') progList.appendChild(li);
+      });
+
+      matchSkillsCardHeight(); // optional layout adjustment
     })
     .catch(console.error);
 }
 
+function addSkill(type) {
+  const inputEl = document.getElementById(type === 'technical' ? 'newTechnicalSkill' : 'newProgrammingSkill');
+  const value = inputEl.value.trim();
+  if (!value) return;
 
-function deleteSkill(type, idx) {
-    if(type === 'technical') {
-        technicalSkills.splice(idx, 1);
-    } else {
-        programmingSkills.splice(idx, 1);
-    }
-    renderSkills();
+  fetch(`${BASE_URL}/skills/add`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: new URLSearchParams({
+      skill_type: type,
+      skill_name: value
+    })
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.status !== 'success') return alert('Failed to add skill.');
+      inputEl.value = '';
+      renderSkills(); // Reload skills from the server
+    })
+    .catch(console.error);
 }
 
-// Dynamic height sync
-function matchSkillsCardHeight() {
-    const edu = document.getElementById('education-card');
-    const skills = document.getElementById('skills-card');
-    if (edu && skills) {
-        skills.style.height = 'auto';
-        edu.style.height = 'auto';
-        const maxHeight = Math.max(edu.offsetHeight, skills.offsetHeight);
-        edu.style.height = maxHeight + 'px';
-        skills.style.height = maxHeight + 'px';
-    }
+function deleteSkill(id) {
+  fetch(`${BASE_URL}/skills/delete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: new URLSearchParams({ id })
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.status !== 'success') return alert('Failed to delete skill.');
+      renderSkills(); // Reload after delete
+    })
+    .catch(console.error);
 }
+
+// Initial load
+document.addEventListener('DOMContentLoaded', () => {
+  renderSkills();
+});
+
 
 // EMPLOYMENT
-let editingEmploymentIndex = null;
-
-function openAddEmploymentModal() {
-    editingEmploymentIndex = null;
-    document.getElementById('employmentModalTitle').textContent = 'Add Employment';
-    resetForm('employmentForm');
-    toggleModal('employmentModal', true);
+function loadEmployment() {
+  fetch(`${BASE_URL}/employment/list`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(r => r.json())
+    .then(data => renderEmployment(data))
+    .catch(console.error);
 }
 
-function openEditEmploymentModal(index) {
-    editingEmploymentIndex = index;
-    const item = document.querySelectorAll('#employment-card .timeline .item')[index];
-    if (!item) return;
+function renderEmployment(employments) {
+  const timeline = document.querySelector('.timeline');
+  timeline.innerHTML = '';
 
-    document.getElementById('employmentModalTitle').textContent = 'Edit Employment';
-    document.getElementById('employmentCompany').value = item.querySelector('.employment-company')?.textContent || '';
-    document.getElementById('employmentTitle').value = item.querySelector('.employment-title')?.textContent || '';
+  employments.forEach(emp => {
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.onclick = () => openEditEmploymentModal(emp);
 
-    const [start, end] = item.querySelector('.employment-dates')?.textContent.split('-') || [];
-    document.getElementById('employmentStart').value = start?.trim() || '';
-    document.getElementById('employmentEnd').value = end?.trim() || '';
+    item.innerHTML = `
+      <span class="timeline-dot color-1"></span>
+      <div class="employment-details">
+        <div class="employment-row">
+          <span class="employment-company">${emp.company_name}</span>
+          <span class="employment-dates">${emp.start_date} - ${emp.end_date}</span>
+        </div>
+        <div class="employment-title">${emp.job_title}</div>
+        <ul class="employment-desc">
+          <li>${emp.description}</li>
+        </ul>
+      </div>
+    `;
+    timeline.appendChild(item);
+  });
+}
 
-    document.getElementById('employmentDesc').value = Array.from(item.querySelectorAll('.employment-desc li')).map(li => li.textContent).join('\n');
-    toggleModal('employmentModal', true);
+// Example add
+function saveEmployment(event) {
+  event.preventDefault();
+
+  const id = document.getElementById('employmentId').value;
+  const url = id ? `${BASE_URL}/employment/update/${id}` : `${BASE_URL}/employment/add`;
+
+  const formData = new URLSearchParams({
+    company_name: document.getElementById('employmentCompany').value,
+    job_title: document.getElementById('employmentTitle').value,
+    start_date: document.getElementById('employmentStart').value,
+    end_date: document.getElementById('employmentEnd').value,
+    description: document.getElementById('employmentDesc').value,
+  });
+
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+    body: formData
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.status !== 'success') return alert('Failed to save employment.');
+      closeEmploymentModal();
+      loadEmployment();
+    })
+    .catch(console.error);
+}
+
+function openAddEmploymentModal() {
+  document.getElementById('employmentForm').reset();
+  document.getElementById('employmentId').value = '';
+  document.getElementById('employmentModalTitle').textContent = 'Add Employment';
+  document.getElementById('employmentModal').classList.add('is-active');
+}
+
+function openEditEmploymentModal(emp) {
+  document.getElementById('employmentCompany').value = emp.company_name;
+  document.getElementById('employmentTitle').value = emp.job_title;
+  document.getElementById('employmentStart').value = emp.start_date;
+  document.getElementById('employmentEnd').value = emp.end_date;
+  document.getElementById('employmentDesc').value = emp.description;
+  document.getElementById('employmentId').value = emp.id;
+  document.getElementById('employmentModalTitle').textContent = 'Edit Employment';
+  document.getElementById('employmentModal').classList.add('is-active');
 }
 
 function closeEmploymentModal() {
-    toggleModal('employmentModal', false);
+  document.getElementById('employmentModal').classList.remove('is-active');
 }
+
+function loadEmployment() {
+    fetch(`${BASE_URL}/employment/list`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(r => r.json())
+        .then(data => renderEmploymentTimeline(data))
+        .catch(console.error);
+}
+
+function renderEmploymentTimeline(employments) {
+    const timeline = document.getElementById('employment-timeline');
+    timeline.innerHTML = ''; // Clear previous items
+
+    employments.forEach((emp, index) => {
+        const colorClass = `color-${(index % 3) + 1}`;
+
+        const item = document.createElement('div');
+        item.className = 'item';
+        item.onclick = () => openEditEmploymentModal(emp); // Pass the whole object
+
+        item.innerHTML = `
+            <span class="timeline-dot ${colorClass}"></span>
+            <div class="employment-details">
+                <div class="employment-row">
+                    <span class="employment-company">${emp.company_name}</span>
+                    <span class="employment-dates">${emp.start_date} - ${emp.end_date}</span>
+                </div>
+                <div class="employment-title">${emp.job_title}</div>
+                <ul class="employment-desc">
+                    ${emp.description.split('\n').map(line => `<li>${line}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+
+        timeline.appendChild(item);
+    });
+}
+
+// Call this when your page loads
+document.addEventListener('DOMContentLoaded', loadEmployment);
 
 // PROJECT
-let editingProjectIndex = null;
-
-function openAddProjectModal() {
-    editingProjectIndex = null;
-    document.getElementById('projectsModalTitle').textContent = 'Add Project';
-    resetForm('projectForm', 'projectImgPreview');
-    toggleModal('projectsModal', true);
+function loadProjects() {
+    fetch(`${BASE_URL}/projects/list`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(r => r.json())
+        .then(data => renderProjects(data))
+        .catch(console.error);
 }
 
-function openEditProjectModal(index) {
-    editingProjectIndex = index;
-    const item = document.querySelectorAll('.project-item')[index];
-    if (!item) return;
+function renderProjects(projects) {
+    const list = document.getElementById('project-list');
+    list.innerHTML = '';
 
+    projects.forEach((project, index) => {
+        const item = document.createElement('div');
+        item.className = 'project-item';
+        item.onclick = () => openEditProjectModal(project);
+
+        item.innerHTML = `
+            <img class="project-img" src="${project.image || '/assets/img/profile.png'}" alt="Project Image">
+            <p class="project-title mt-2 has-text-weight-bold">${project.title}</p>
+            <p class="project-role is-size-10"><em>${project.role}</em></p>
+            <p class="project-dates is-size-7">${project.dates}</p>
+            <ul class="project-desc is-size-7 mt-2">
+                ${project.description.split('\n').map(line => `<li>${line}</li>`).join('')}
+            </ul>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function saveProject(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('projectId').value;
+    const url = id ? `${BASE_URL}/project/update/${id}` : `${BASE_URL}/project/add`;
+
+    const form = document.getElementById('projectForm');
+    const formData = new FormData(form);
+    formData.set('title', document.getElementById('projectTitle').value);
+    formData.set('dates', document.getElementById('projectDates').value);
+    formData.set('role', document.getElementById('projectRole').value);
+    formData.set('description', document.getElementById('projectDesc').value);
+
+    const fileInput = document.getElementById('projectImgInput');
+    if (fileInput.files[0]) {
+        formData.set('image', fileInput.files[0]);
+    }
+
+    fetch(url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: formData
+    })
+        .then(r => r.json())
+        .then(res => {
+            if (res.status !== 'success') return alert('Failed to save project.');
+            closeProjectsModal();
+            loadProjects();
+        })
+        .catch(console.error);
+}
+
+function openEditProjectModal(project) {
     document.getElementById('projectsModalTitle').textContent = 'Edit Project';
-    document.getElementById('projectTitle').value = item.querySelector('.project-title')?.textContent || '';
-    document.getElementById('projectDates').value = item.querySelector('.project-dates')?.textContent || '';
-    document.getElementById('projectRole').value = item.querySelector('.project-role')?.textContent || '';
-    document.getElementById('projectDesc').value = Array.from(item.querySelectorAll('.project-desc li')).map(li => li.textContent).join('\n');
-
-    const img = item.querySelector('.project-img');
-    document.getElementById('projectImgPreview').src = img?.src || BASE_URL + 'assets/img/profile.png';
+    document.getElementById('projectTitle').value = project.title;
+    document.getElementById('projectDates').value = project.dates;
+    document.getElementById('projectRole').value = project.role;
+    document.getElementById('projectDesc').value = project.description;
+    document.getElementById('projectImgPreview').src = project.image || '/assets/img/profile.png';
+    document.getElementById('projectId').value = project.id;
     toggleModal('projectsModal', true);
 }
 
@@ -421,31 +521,103 @@ function closeProjectsModal() {
     toggleModal('projectsModal', false);
 }
 
+// On page load
+document.addEventListener('DOMContentLoaded', loadProjects);
+
+function loadProjects() {
+    fetch(`${BASE_URL}/project/list`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(r => r.json())
+        .then(projects => {
+            const container = document.querySelector('.project-list-horizontal');
+            container.innerHTML = '';
+
+            if (!projects.length) {
+                container.innerHTML = '<p>No projects found.</p>';
+                return;
+            }
+
+            projects.forEach((proj, i) => {
+                const item = document.createElement('div');
+                item.className = 'project-item';
+                item.onclick = () => openEditProjectModal(proj);
+
+                item.innerHTML = `
+                    <img class="project-img" src="${proj.image || '/assets/img/profile.png'}" alt="Project Image">
+                    <p class="project-title mt-2 has-text-weight-bold">${proj.title}</p>
+                    <p class="project-role"><em>${proj.role}</em></p>
+                    <p class="project-dates is-size-7">${proj.dates}</p>
+                    <ul class="project-desc is-size-7 mt-2">
+                        ${proj.description.split('\n').map(d => `<li>${d}</li>`).join('')}
+                    </ul>
+                `;
+                container.appendChild(item);
+            });
+        })
+        .catch(err => console.error('Error loading projects:', err));
+}
+
+// Run this on page load
+document.addEventListener('DOMContentLoaded', loadProjects);
+
 
 // EXTRACURRICULAR 
-let editingExtraIndex = null;
 
-function openAddExtraModal() {
-    editingExtraIndex = null;
-    document.getElementById('extraModalTitle').textContent = 'Add Extracurricular Activity';
-    resetForm('extraForm');
-    toggleModal('extraModal', true);
+function loadExtra() {
+    fetch(BASE_URL + '/extracurricular/list', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(r => r.json())
+        .then(data => {
+            const container = document.querySelector('.content');
+            container.innerHTML = '';
+
+            data.forEach((extra, index) => {
+                container.innerHTML += `
+                    <div class="extra-item" onclick="openEditExtraModal(${index})">
+                        <div class="extra-details">
+                            <div class="extra-row">
+                                <span class="extra-title">${extra.title}</span>
+                                <span class="extra-dates">${extra.dates}</span>
+                            </div>
+                            <div class="extra-role">${extra.role}</div>
+                            <ul class="extra-desc">
+                                ${extra.description.split('\n').map(d => `<li>${d}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+        })
+        .catch(console.error);
 }
 
-function openEditExtraModal(index) {
-    editingExtraIndex = index;
-    const item = document.querySelectorAll('.extra-item')[index];
-    if (!item) return;
+document.addEventListener('DOMContentLoaded', loadExtra);
 
-    document.getElementById('extraModalTitle').textContent = 'Edit Extracurricular Activity';
-    document.getElementById('extraTitle').value = item.querySelector('.extra-title')?.textContent || '';
-    document.getElementById('extraDates').value = item.querySelector('.extra-dates')?.textContent || '';
-    document.getElementById('extraRole').value = item.querySelector('.extra-role')?.textContent || '';
-    document.getElementById('extraDesc').value = Array.from(item.querySelectorAll('.extra-desc li')).map(li => li.textContent).join('\n');
+function saveExtracurricular(event) {
+  event.preventDefault();
 
-    toggleModal('extraModal', true);
-}
+  const id = document.getElementById('extraId').value;
+  const url = id ? `${BASE_URL}/extracurricular/update/${id}` : `${BASE_URL}/extracurricular/add`;
 
-function closeExtraModal() {
-    toggleModal('extraModal', false);
+  const formData = new URLSearchParams({
+    title: document.getElementById('extraTitle').value,
+    dates: document.getElementById('extraDates').value,
+    role: document.getElementById('extraRole').value,
+    description: document.getElementById('extraDesc').value,
+  });
+
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+    body: formData
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.status !== 'success') return alert('Failed to save extracurricular.');
+      closeExtraModal();
+      loadExtra();
+    })
+    .catch(console.error);
 }

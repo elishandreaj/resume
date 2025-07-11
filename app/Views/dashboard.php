@@ -1,6 +1,6 @@
 <?= view('profile_info')?>
 
-<div class="columns is-centered" style="margin-bottom:0; gap: 18px; margin:0 auto; max-width: 1200px; z-index: 1000px;">
+<div class="columns is-centered" style="gap: 1%; margin:0 auto; max-width: 120%; z-index: 1000px;">
   <div class="column is-6">
     <?php echo view('education'); ?>
   </div>
@@ -15,5 +15,6 @@
 
 <script>
     const BASE_URL = "<?= rtrim(base_url(), '/') ?>";
+    const skillsData = <?= json_encode($skills ?? []) ?>;
 </script>
 <script src="<?= base_url('assets/js/scripts.js') ?>" defer></script>
