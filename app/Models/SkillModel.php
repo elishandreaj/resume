@@ -9,7 +9,6 @@ class SkillModel extends Model
     protected $table = 'skills';
     protected $primaryKey = 'id';
     protected $allowedFields = [
-        'user_id',
         'skill_type',
         'skill_name',
     ];

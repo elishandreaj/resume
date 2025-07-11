@@ -13,10 +13,18 @@ body {
     margin-left: auto;
     margin-right: auto;
     gap: 20px;
+    position: static;
 }
 
 .column > .card {
     height: 100%;
+}
+
+.column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Profile */
@@ -42,10 +50,7 @@ body {
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     position: relative;
-    z-index: 1;
     margin-bottom: 0;
-    min-height: 180px;
-    position: relative; 
     margin-top: -10px;
 }
 
@@ -227,13 +232,42 @@ body {
 
 
 /* Skills Section */
+#skills-card {
+    width: 80%;
+    margin-right: 0;
+}
+
+/* Skills List Styles */
+ul#technical-skills-list,
+ul#programming-skills-list {
+    list-style-type: disc;
+    padding-left: 0.5em;
+    margin: 0;
+}
+
 ul#technical-skills-list li,
 ul#programming-skills-list li {
     display: flex;
-    align-items: center;
     justify-content: space-between;
     margin-bottom: 6px;
     font-size: 1em;
+    word-break: break-word;
+}
+
+ul#technical-skills-list li button,
+ul#programming-skills-list li button {
+    background: none;
+    border: none;
+    color: #ff3860;
+    font-size: 1.2em;
+    margin-left: 8px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+ul#technical-skills-list li button:hover,
+ul#programming-skills-list li button:hover {
+    color: #ff0033;
 }
 
 .delete-skill-btn {
@@ -301,8 +335,8 @@ ul#programming-skills-list li {
 
 /* Employment + Other Section */
 #employment-card, #projects-card, #extra-card {
-    margin-left: 50px;
-    margin-bottom: 10px;
+    margin-left: 3%;
+    margin-bottom: 3%;
 } 
 
 .employment-details, .extra-details {
@@ -319,7 +353,7 @@ ul#programming-skills-list li {
 
 .employment-company, .extra-title {
     font-weight: bold;
-    font-size: 1.08em;
+    font-size: 1.5em;
     color: #222;
 }
 
@@ -331,40 +365,29 @@ ul#programming-skills-list li {
 }
 
 .employment-title, .extra-role {
-    font-size: 1em;
+    font-size: 1.2em;
     color: #444;
     margin-bottom: 6px;
     font-weight: 500;
 }
 
 .employment-desc, .extra-desc {
-    margin: 0 0 0 0;
     padding-left: 18px;
-    font-size: 0.98em;
+    font-size: 1em;
     color: #444;
 }
 
 .employment-desc li, .extra-desc li {
-    margin-bottom: 4px;
     line-height: 1.5;
 }
 
 /* Projects Section */
-.project-item {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 1rem;
-    margin: 0.5rem;
-    transition: box-shadow 0.2s;
-    cursor: pointer;
-    flex: 0 0 auto;
-    width: 260px;
-    scroll-snap-align: start;
-}
-
 .project-item:hover {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.project-title {
+    font-size: 2em;
 }
 
 .project-dates {
@@ -373,19 +396,22 @@ ul#programming-skills-list li {
     font-weight: 500;
     letter-spacing: 1px;
     white-space: nowrap;
+    text-align: center;
 }
 
 .project-role {
-    font-size: 1em;
+    font-size: 1.2em;
     color: #444;
     margin-bottom: 6px;
     font-style: italic;
+    text-align: center;
 }
 
 .project-desc {
     text-align: justify;
     margin-top: 0.5rem;
     padding: 0 0.5rem;
+    font-size: 0.8em;
 }
 
 .project-list-horizontal {
@@ -393,31 +419,40 @@ ul#programming-skills-list li {
     overflow-x: auto;
     gap: 1rem;
     padding: 1rem 0;
-    text-align: center;
     scroll-snap-type: x mandatory;
-    flex-wrap: nowrap;
     scroll-behavior: smooth;
+    flex-wrap: nowrap;
+    width: 100%; 
+    margin: 0; 
 }
 
 .project-list-horizontal::-webkit-scrollbar {
-  display: none; 
+    display: none;
+}
+
+.project-item {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 1rem;
+    transition: box-shadow 0.2s;
+    cursor: pointer;
+    flex: 0 0 30%; 
+    min-width: 30%; 
+    max-width: 50%;
+    scroll-snap-align: start;
+    text-align: center;
 }
 
 .project-img {
-    width: 250px; 
-    height: 150px; 
+    width: 100%; 
+    height: 60%; 
     object-fit: cover; 
     border-radius: 12px; 
     border-color: lightblue; 
     border-width: 3px; 
     border-style: solid;
-}
-
-/* All except profile section */
-.card {
-    border-radius: 14px; 
-    max-width: 1175px; 
-    margin-top: 20px;
+    align-self: center;
 }
 
 
@@ -488,7 +523,7 @@ ul#programming-skills-list li {
 /* Items */
 .item {
     position: relative;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;         
     min-height: 54px;
@@ -514,4 +549,6 @@ ul#programming-skills-list li {
     padding: 0;
     left: 20px;
     cursor: pointer;
+    margin-right: 1.5%;
+    margin-bottom: 2%;
 }
